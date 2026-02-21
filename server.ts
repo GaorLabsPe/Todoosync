@@ -53,12 +53,19 @@ async function startServer() {
   });
 
   // Auth Routes
-  app.post("/api/auth/login", (req, res) => {
+  app.all("/api/auth/login", (req, res) => {
     const { username, password } = req.body;
+    const method = req.method;
     
-    // Debug logs (Solo visibles en consola del servidor)
-    console.log(`[Auth] Intento de login - Usuario: "${username}"`);
+    console.log(`[Auth] ${method} request to /api/auth/login`);
 
+    if (method !== "POST") {
+      return res.status(405).json({ 
+        error: "Method Not Allowed", 
+        message: `El servidor recibió un ${method}, pero el login requiere un POST. Revisa que el frontend esté enviando POST.` 
+      });
+    }
+    
     const cleanUser = (username || "").toString().trim().toLowerCase();
     const cleanPass = (password || "").toString().trim();
     
