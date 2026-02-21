@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Nunito:wght@400;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-nunito: "Nunito", sans-serif;
+  
+  --color-bg: #F0EEF3;
+  --color-surface: #FFFFFF;
+  --color-border: #E4E0EB;
+  --color-border-med: #CEC8D8;
+  --color-text: #1C1726;
+  --color-text-sub: #5C5570;
+  --color-text-muted: #9B93AD;
+  --color-brand: #714B67;
+  --color-brand-light: #F5EFF3;
+  --color-brand-mid: #9C6B8F;
+  --color-teal: #017E84;
+  --color-teal-light: #E5F4F5;
+  --color-orange: #E07316;
+  --color-orange-light: #FEF3E7;
+  --color-green: #1F7D53;
+  --color-green-light: #E7F5EF;
+  --color-red: #C0392B;
+  --color-red-light: #FDEDEB;
+  --color-yellow: #D97706;
+  --color-yellow-light: #FEF9E7;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-text font-sans;
+  }
+}

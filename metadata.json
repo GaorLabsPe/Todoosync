@@ -1,0 +1,5 @@
+{
+  "name": "OdooSync Platform",
+  "description": "Multi-tenant platform for synchronizing Odoo POS daily sales to Supabase with real-time dashboard.",
+  "requestFramePermissions": []
+}
