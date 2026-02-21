@@ -53,23 +53,21 @@ async function startServer() {
   });
 
   // Auth Routes
-  app.all("/api/auth/login", (req, res) => {
-    const { username, password } = req.body;
-    const method = req.method;
-    
-    console.log(`[Auth] ${method} request to /api/auth/login`);
+  app.get("/api/v1/auth/login", (req, res) => {
+    console.log("[Auth] GET request received at /api/v1/auth/login - This should be a POST!");
+    res.status(405).json({ 
+      error: "Method Not Allowed", 
+      message: "Se recibió un GET. El login requiere un POST. Verifica que el frontend esté configurado correctamente." 
+    });
+  });
 
-    if (method !== "POST") {
-      return res.status(405).json({ 
-        error: "Method Not Allowed", 
-        message: `El servidor recibió un ${method}, pero el login requiere un POST. Revisa que el frontend esté enviando POST.` 
-      });
-    }
+  app.post("/api/v1/auth/login", (req, res) => {
+    const { username, password } = req.body;
+    
+    console.log(`[Auth] POST request to /api/v1/auth/login - User: "${username}"`);
     
     const cleanUser = (username || "").toString().trim().toLowerCase();
     const cleanPass = (password || "").toString().trim();
-    
-    console.log(`[Auth] Intento: User="${cleanUser}", Pass="${cleanPass}"`);
 
     // MODO EMERGENCIA: Si el usuario es admin, permitir acceso para desbloquear al usuario
     if (cleanUser === "admin") {
@@ -82,12 +80,11 @@ async function startServer() {
     res.status(401).json({ error: "Invalid credentials" });
   });
 
-  app.post("/api/auth/logout", (req, res) => {
-    // With JWT, logout is handled client-side by removing the token
+  app.post("/api/v1/auth/logout", (req, res) => {
     res.json({ success: true });
   });
 
-  app.get("/api/auth/me", (req, res) => {
+  app.get("/api/v1/auth/me", (req, res) => {
     const authHeader = req.headers.authorization;
     if (authHeader?.startsWith("Bearer ")) {
       try {

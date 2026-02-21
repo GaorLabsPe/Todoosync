@@ -607,7 +607,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch('/api/auth/me', {
+      const res = await fetch('/api/v1/auth/me', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -659,7 +659,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: loginUser, password: loginPass })
@@ -681,7 +681,7 @@ export default function App() {
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem('odoo_sync_token');
-      await fetch('/api/auth/logout', { 
+      await fetch('/api/v1/auth/logout', { 
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
