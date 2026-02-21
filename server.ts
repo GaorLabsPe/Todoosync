@@ -54,14 +54,26 @@ async function startServer() {
   app.post("/api/auth/login", (req, res) => {
     const { username, password } = req.body;
     
-    const adminUser = process.env.ADMIN_USERNAME || "admin";
-    const adminPass = process.env.ADMIN_PASSWORD || "Luis2026.";
+    // Debug logs (Solo visibles en consola del servidor)
+    console.log(`[Auth] Intento de login - Usuario: "${username}"`);
 
-    if ((username === "admin" && password === "Luis2026.") || (username === adminUser && password === adminPass)) {
-      const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "24h" });
-      return res.json({ success: true, token, user: { username } });
+    const cleanUser = (username || "").trim();
+    const cleanPass = (password || "").trim();
+    
+    const adminUser = (process.env.ADMIN_USERNAME || "admin").trim();
+    const adminPass = (process.env.ADMIN_PASSWORD || "Luis2026.").trim();
+
+    // Validación multi-capa
+    const isHardcoded = cleanUser === "admin" && cleanPass === "Luis2026.";
+    const isEnvMatch = cleanUser === adminUser && cleanPass === adminPass;
+
+    if (isHardcoded || isEnvMatch) {
+      console.log("[Auth] Login exitoso");
+      const token = jwt.sign({ username: cleanUser }, JWT_SECRET, { expiresIn: "24h" });
+      return res.json({ success: true, token, user: { username: cleanUser } });
     }
 
+    console.log("[Auth] Login fallido: Credenciales no coinciden");
     res.status(401).json({ error: "Invalid credentials" });
   });
 
