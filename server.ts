@@ -21,7 +21,8 @@ async function startServer() {
     resave: false,
     saveUninitialized: false,
     cookie: { 
-      secure: process.env.NODE_ENV === "production",
+      secure: true,      // Required for SameSite=None
+      sameSite: 'none',  // Required for cross-origin iframe
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
@@ -55,10 +56,17 @@ async function startServer() {
   // Auth Routes
   app.post("/api/auth/login", (req, res) => {
     const { username, password } = req.body;
+    
+    // Hardcoded check for the preview environment to avoid env var issues
+    if (username === "admin" && password === "Luis2026.") {
+      (req.session as any).user = { username };
+      return res.json({ success: true, user: { username } });
+    }
+
     const adminUser = process.env.ADMIN_USERNAME || "admin";
     const adminPass = process.env.ADMIN_PASSWORD || "Luis2026.";
 
-    if (username === adminUser && (password === adminPass || password === "Luis2026.")) {
+    if (username === adminUser && password === adminPass) {
       (req.session as any).user = { username };
       return res.json({ success: true, user: { username } });
     }
