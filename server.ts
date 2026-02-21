@@ -4,35 +4,32 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { z } from "zod";
 import * as crypto from "crypto";
-import session from "express-session";
-import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const JWT_SECRET = process.env.SESSION_SECRET || "odoo-sync-platform-secret-key";
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
   app.use(express.json());
-  app.use(cookieParser());
-  app.use(session({
-    secret: process.env.SESSION_SECRET || "odoo-sync-platform-secret-key",
-    resave: false,
-    saveUninitialized: false,
-    cookie: { 
-      secure: true,      // Required for SameSite=None
-      sameSite: 'none',  // Required for cross-origin iframe
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
-  }));
 
-  // Middleware for API Key or Session validation
+  // Middleware for API Key or JWT validation
   const authMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    // 1. Check for Session (Dashboard)
-    if ((req.session as any).user) {
-      return next();
+    // 1. Check for JWT (Dashboard)
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith("Bearer ")) {
+      try {
+        const token = authHeader.split(" ")[1];
+        const payload = jwt.verify(token, JWT_SECRET);
+        (req as any).user = payload;
+        return next();
+      } catch (err) {
+        // Continue to check API Key if JWT fails
+      }
     }
 
     // 2. Check for API Key (Integrations)
@@ -57,34 +54,30 @@ async function startServer() {
   app.post("/api/auth/login", (req, res) => {
     const { username, password } = req.body;
     
-    // Hardcoded check for the preview environment to avoid env var issues
-    if (username === "admin" && password === "Luis2026.") {
-      (req.session as any).user = { username };
-      return res.json({ success: true, user: { username } });
-    }
-
     const adminUser = process.env.ADMIN_USERNAME || "admin";
     const adminPass = process.env.ADMIN_PASSWORD || "Luis2026.";
 
-    if (username === adminUser && password === adminPass) {
-      (req.session as any).user = { username };
-      return res.json({ success: true, user: { username } });
+    if ((username === "admin" && password === "Luis2026.") || (username === adminUser && password === adminPass)) {
+      const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: "24h" });
+      return res.json({ success: true, token, user: { username } });
     }
 
     res.status(401).json({ error: "Invalid credentials" });
   });
 
   app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) return res.status(500).json({ error: "Could not log out" });
-      res.clearCookie("connect.sid");
-      res.json({ success: true });
-    });
+    // With JWT, logout is handled client-side by removing the token
+    res.json({ success: true });
   });
 
   app.get("/api/auth/me", (req, res) => {
-    if ((req.session as any).user) {
-      return res.json({ user: (req.session as any).user });
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith("Bearer ")) {
+      try {
+        const token = authHeader.split(" ")[1];
+        const payload = jwt.verify(token, JWT_SECRET);
+        return res.json({ user: payload });
+      } catch (err) {}
     }
     res.status(401).json({ error: "Not authenticated" });
   });

@@ -100,10 +100,14 @@ function ModalNuevaConexion({ onClose, onSave }: { onClose: () => void; onSave: 
   const handleTest = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    const token = localStorage.getItem('odoo_sync_token');
     try {
       const res = await fetch('/api/odoo/test', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(form)
       });
       if (res.ok) {
@@ -596,12 +600,22 @@ export default function App() {
   }, []);
 
   const checkAuth = async () => {
+    const token = localStorage.getItem('odoo_sync_token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch('/api/auth/me');
+      const res = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
-        fetchData();
+        fetchData(token);
+      } else {
+        localStorage.removeItem('odoo_sync_token');
       }
     } catch (err) {
       console.error(err);
@@ -610,12 +624,15 @@ export default function App() {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = async (tokenOverride?: string) => {
+    const token = tokenOverride || localStorage.getItem('odoo_sync_token');
+    if (!token) return;
+
     setLoading(true);
     try {
       const [connRes, cierresRes] = await Promise.all([
-        fetch('/api/connections'),
-        fetch('/api/cierres')
+        fetch('/api/connections', { headers: { 'Authorization': `Bearer ${token}` } }),
+        fetch('/api/cierres', { headers: { 'Authorization': `Bearer ${token}` } })
       ]);
 
       if (connRes.ok && cierresRes.ok) {
@@ -644,8 +661,9 @@ export default function App() {
       });
       if (res.ok) {
         const data = await res.json();
+        localStorage.setItem('odoo_sync_token', data.token);
         setUser(data.user);
-        fetchData();
+        fetchData(data.token);
       } else {
         setLoginError('Credenciales inválidas');
       }
@@ -656,7 +674,12 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      const token = localStorage.getItem('odoo_sync_token');
+      await fetch('/api/auth/logout', { 
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      localStorage.removeItem('odoo_sync_token');
       setUser(null);
     } catch (err) {
       console.error(err);
@@ -664,10 +687,14 @@ export default function App() {
   };
 
   const triggerSync = async (id: string) => {
+    const token = localStorage.getItem('odoo_sync_token');
     try {
       const res = await fetch('/api/sync', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ connection_id: id })
       });
       if (res.ok) {
@@ -680,9 +707,13 @@ export default function App() {
   };
 
   const saveConnection = async (data: any) => {
+    const token = localStorage.getItem('odoo_sync_token');
     const res = await fetch('/api/connections', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(data)
     });
     if (res.ok) {
