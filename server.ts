@@ -56,7 +56,7 @@ async function startServer() {
   app.post("/api/auth/login", (req, res) => {
     const { username, password } = req.body;
     const adminUser = process.env.ADMIN_USERNAME || "admin";
-    const adminPass = process.env.ADMIN_PASSWORD || "admin";
+    const adminPass = process.env.ADMIN_PASSWORD || "Luis2026.";
 
     if (username === adminUser && password === adminPass) {
       (req.session as any).user = { username };
