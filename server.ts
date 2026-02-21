@@ -57,20 +57,19 @@ async function startServer() {
     // Debug logs (Solo visibles en consola del servidor)
     console.log(`[Auth] Intento de login - Usuario: "${username}"`);
 
-    const cleanUser = (username || "").trim();
-    const cleanPass = (password || "").trim();
+    const cleanUser = (username || "").toString().trim().toLowerCase();
+    const cleanPass = (password || "").toString().trim();
     
-    const adminUser = (process.env.ADMIN_USERNAME || "admin").trim();
-    const adminPass = (process.env.ADMIN_PASSWORD || "Luis2026.").trim();
+    console.log(`[Auth] Intento: User="${cleanUser}", Pass="${cleanPass}"`);
 
-    // Validación multi-capa
-    const isHardcoded = cleanUser === "admin" && cleanPass === "Luis2026.";
-    const isEnvMatch = cleanUser === adminUser && cleanPass === adminPass;
+    // Permisividad total para el admin en este entorno
+    const isLuis = cleanPass === "Luis2026." || cleanPass === "Luis2026";
+    const isAdmin = cleanUser === "admin";
 
-    if (isHardcoded || isEnvMatch) {
-      console.log("[Auth] Login exitoso");
-      const token = jwt.sign({ username: cleanUser }, JWT_SECRET, { expiresIn: "24h" });
-      return res.json({ success: true, token, user: { username: cleanUser } });
+    if (isAdmin && isLuis) {
+      console.log("[Auth] Login exitoso (Permisivo)");
+      const token = jwt.sign({ username: "admin" }, JWT_SECRET, { expiresIn: "24h" });
+      return res.json({ success: true, token, user: { username: "admin" } });
     }
 
     console.log("[Auth] Login fallido: Credenciales no coinciden");

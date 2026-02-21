@@ -646,18 +646,23 @@ export default function App() {
     }
   };
 
+  const [loginUser, setLoginUser] = useState('');
+  const [loginPass, setLoginPass] = useState('');
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoginError('');
-    const formData = new FormData(e.currentTarget);
-    const username = formData.get('username') as string;
-    const password = formData.get('password') as string;
+    
+    if (!loginUser || !loginPass) {
+      setLoginError('Por favor completa todos los campos');
+      return;
+    }
 
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username: loginUser, password: loginPass })
       });
       if (res.ok) {
         const data = await res.json();
@@ -665,10 +670,11 @@ export default function App() {
         setUser(data.user);
         fetchData(data.token);
       } else {
-        setLoginError('Credenciales inválidas');
+        const errData = await res.json();
+        setLoginError(errData.error || 'Credenciales inválidas');
       }
     } catch (err) {
-      setLoginError('Error al iniciar sesión');
+      setLoginError('Error de conexión con el servidor');
     }
   };
 
@@ -741,6 +747,8 @@ export default function App() {
                   name="username"
                   type="text" 
                   required
+                  value={loginUser}
+                  onChange={(e) => setLoginUser(e.target.value)}
                   className="bg-bg border border-border p-3 rounded-lg text-sm outline-none focus:border-brand"
                   placeholder="admin"
                 />
@@ -751,6 +759,8 @@ export default function App() {
                   name="password"
                   type="password" 
                   required
+                  value={loginPass}
+                  onChange={(e) => setLoginPass(e.target.value)}
                   className="bg-bg border border-border p-3 rounded-lg text-sm outline-none focus:border-brand"
                   placeholder="••••••••"
                 />
