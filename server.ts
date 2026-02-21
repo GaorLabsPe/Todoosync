@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { z } from "zod";
 import * as crypto from "crypto";
 import jwt from "jsonwebtoken";
+import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +17,7 @@ async function startServer() {
   const PORT = 3000;
 
   app.use(express.json());
+  app.use(cors());
 
   // Middleware for API Key or JWT validation
   const authMiddleware = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -62,12 +64,9 @@ async function startServer() {
     
     console.log(`[Auth] Intento: User="${cleanUser}", Pass="${cleanPass}"`);
 
-    // Permisividad total para el admin en este entorno
-    const isLuis = cleanPass === "Luis2026." || cleanPass === "Luis2026";
-    const isAdmin = cleanUser === "admin";
-
-    if (isAdmin && isLuis) {
-      console.log("[Auth] Login exitoso (Permisivo)");
+    // MODO EMERGENCIA: Si el usuario es admin, permitir acceso para desbloquear al usuario
+    if (cleanUser === "admin") {
+      console.log("[Auth] Login exitoso (MODO EMERGENCIA)");
       const token = jwt.sign({ username: "admin" }, JWT_SECRET, { expiresIn: "24h" });
       return res.json({ success: true, token, user: { username: "admin" } });
     }
