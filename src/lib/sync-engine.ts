@@ -1,6 +1,6 @@
-import { OdooClient } from './odoo-client.ts';
-import { supabaseAdmin } from './supabase.ts';
-import { decrypt } from './crypto.ts';
+import { OdooClient } from './odoo-client';
+import { supabaseAdmin } from './supabase';
+import { decrypt } from './crypto';
 import { format, startOfDay, endOfDay } from 'date-fns';
 
 export async function syncDailySales(connectionId: string, dateStr?: string) {

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { OdooClient } from "../../src/lib/odoo-client.ts";
+import { OdooClient } from "../../src/lib/odoo-client";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.SESSION_SECRET || "odoo-sync-platform-secret-key";

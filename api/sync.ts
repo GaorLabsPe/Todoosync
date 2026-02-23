@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { syncDailySales } from "../src/lib/sync-engine.ts";
+import { syncDailySales } from "../src/lib/sync-engine";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.SESSION_SECRET || "odoo-sync-platform-secret-key";

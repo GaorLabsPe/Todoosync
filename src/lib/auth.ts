@@ -1,4 +1,4 @@
-import { supabaseAdmin } from './supabase.ts';
+import { supabaseAdmin } from './supabase';
 
 export async function validateApiKey(apiKey: string): Promise<boolean> {
   if (!apiKey) return false;

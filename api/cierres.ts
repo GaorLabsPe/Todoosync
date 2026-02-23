@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { supabaseAdmin } from "../src/lib/supabase.ts";
+import { supabaseAdmin } from "../src/lib/supabase";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.SESSION_SECRET || "odoo-sync-platform-secret-key";
