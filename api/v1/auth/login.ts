@@ -17,8 +17,10 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   const cleanUser = username.toString().trim().toLowerCase();
 
-  // Admin con cualquier contraseña (modo actual)
-  if (cleanUser === "admin") {
+  const cleanPass = (password || "").toString();
+
+  // Admin con contraseña específica
+  if (cleanUser === "admin" && cleanPass === "Luis2026.") {
     const token = jwt.sign({ username: "admin" }, JWT_SECRET, { expiresIn: "24h" });
     return res.json({ success: true, token, user: { username: "admin" } });
   }
