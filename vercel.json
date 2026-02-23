@@ -4,12 +4,7 @@
       "source": "/:path((?!api/).*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "api/**/*.ts": {
-      "runtime": "@vercel/node"
-    }
-  }
+  ]
 }
 
 
